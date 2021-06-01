@@ -45,7 +45,7 @@ def write_to_shards():
     write_to_shards reads the tokenized sentences in the tempfile and
     write those sentences into small text files specified by a limit.
     """
-    lines_per_file = 100000
+    lines_per_file = int(100000)
     smallfile = None
     with open("datasets/temp/temp.txt") as tempfile:
         for lineno, line in enumerate(tempfile):
