@@ -123,9 +123,9 @@ class SinhalaTokenizer(Tokenizer):
 
         # prevent short forms being splitted into separate tokens
         # Eg: පෙ.ව.
-        for short_form in self.short_forms:
-            representation = short_form[0:-1] + self.short_form_identifier
-            sentence = sentence.replace(short_form, representation)
+        # for short_form in self.short_forms:
+        #     representation = short_form[0:-1] + self.short_form_identifier
+        #     sentence = sentence.replace(short_form, representation)
 
         parts = re.split(r'({})'.format(self.word_tokenizer_delims), sentence)
         tokens = [token.replace(self.short_form_identifier, '.') for token in parts if len(token.strip()) != 0]

@@ -35,7 +35,8 @@ def tokenize_directory(directory="datasets/raw"):
             for line in file:
                 tokenized_sentences = tokenize_line(line)
                 for tokenized_sentence in tokenized_sentences:
-                    temp_file.write(tokenized_sentence)
+                    if len(tokenized_sentence) > 20:
+                        temp_file.write(tokenized_sentence)
     temp_file.close()
 
 
@@ -44,14 +45,14 @@ def write_to_shards():
     write_to_shards reads the tokenized sentences in the tempfile and
     write those sentences into small text files specified by a limit.
     """
-    lines_per_file = 5
+    lines_per_file = 100000
     smallfile = None
     with open("datasets/temp/temp.txt") as tempfile:
         for lineno, line in enumerate(tempfile):
             if lineno % lines_per_file == 0:
                 if smallfile:
                     smallfile.close()
-                small_filename = 'datasets/tokenized/small_file_{}.txt'.format(
+                small_filename = 'datasets/tokenized/tokenized_shard_{}.txt'.format(
                     lineno + lines_per_file)
                 smallfile = open(small_filename, "w")
             smallfile.write(line)
