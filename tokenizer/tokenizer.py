@@ -131,10 +131,10 @@ class SinhalaTokenizer(Tokenizer):
         tokens = [token.replace(self.short_form_identifier, '.') for token in parts if len(token.strip()) != 0]
 
         #replace numbers with ###
-        i = 0
-        for token in tokens:
-            tokens[i] = self.clean_numbers(token)
-            i += 1
+        # i = 0
+        # for token in tokens:
+        #     tokens[i] = self.clean_numbers(token)
+        #     i += 1
 
         #remove punctuations
         new_tokens_without_punctionations = []
