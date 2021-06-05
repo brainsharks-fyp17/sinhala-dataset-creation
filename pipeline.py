@@ -47,8 +47,11 @@ def write_to_shards():
     """
     lines_per_file = int(100000)
     smallfile = None
+    dedup_set = set()
     with open("datasets/temp/temp.txt") as tempfile:
         for lineno, line in enumerate(tempfile):
+            dedup_set.add(line)
+        for lineno, line in enumerate(dedup_set):
             if lineno % lines_per_file == 0:
                 if smallfile:
                     smallfile.close()
