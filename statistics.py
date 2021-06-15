@@ -3,6 +3,8 @@ import os
 import glob
 import tarfile
 from pathlib import Path
+import fasttext
+import numpy as np
 
 sinhala_start = 3456
 vowels_and_const_end = 3527
@@ -78,15 +80,20 @@ reverse_dict = dict()
 len_dict = dict()  # key-> length; val-> number of words having that length
 sentence_len_dict = dict()  # key-> sentence; val->length of sentence
 sentence_len_dict_reverse = dict()  # key->legth of a sentence; val-> number of sentences with that length
+sentence_lang_dict = dict()
 
 with open("datasets/raw/sample0.txt") as dataset:
     sentences = dataset.readlines()
     init_stat(sentences, all_words_dict)
+    if not os.path.exists("resources/diagrams"):
+        os.makedirs("resources/diagrams")
 
     # sentence length analysis
     for sen in sentences:
         sentence_len_dict[sen] = words_in_sentence(sen)
     for val in sentence_len_dict.values():
+        if val > 400:
+            pass
         if val in sentence_len_dict_reverse.keys():
             sentence_len_dict_reverse[val] += 1
         else:
@@ -100,13 +107,15 @@ with open("datasets/raw/sample0.txt") as dataset:
     plt.xticks(wps_keys)
     plt.xlabel("length")
     plt.ylabel("number of sentences with the length")
-    plt.savefig("sentence_length.eps", format="eps", dpi=1200)
-    plt.savefig("sentence_length.svg", format="svg", dpi=1200)
+    plt.savefig("resources/diagrams/sentence_length.eps", format="eps", dpi=1200)
+    plt.savefig("resources/diagrams/sentence_length.svg", format="svg", dpi=1200)
 
     # word length analysis
     words_list = all_words_dict.keys()
     for wrd in words_list:
         ln = word_length(wrd)
+        if ln > 150:
+            pass
         if ln in len_dict:
             len_dict[ln] += 1
         else:
@@ -121,13 +130,15 @@ with open("datasets/raw/sample0.txt") as dataset:
     plt.xticks(len_dict_keys_sorted)
     plt.xlabel("length")
     plt.ylabel("number of unique words")
-    plt.savefig("word_length.eps", format="eps", dpi=1200)
-    plt.savefig("word_length.svg", format="svg", dpi=1200)
+    plt.savefig("resources/diagrams/word_length.eps", format="eps", dpi=1200)
+    plt.savefig("resources/diagrams/word_length.svg", format="svg", dpi=1200)
 
 
     # frequency analysis
     for key in all_words_dict:
         val = all_words_dict[key]
+        if val > 150:
+            pass
         if val in reverse_dict:
             reverse_dict[val] += 1
         else:
@@ -141,8 +152,30 @@ with open("datasets/raw/sample0.txt") as dataset:
     plt.plot(k_rev, v_rev, '.r')
     plt.xlabel("frequency")
     plt.ylabel("number of words with that frequency")
-    plt.savefig("frequency.eps", format="eps", dpi=1200)
-    plt.savefig("frequency.svg", format="svg", dpi=1200)
+    plt.savefig("resources/diagrams/frequency.eps", format="eps", dpi=1200)
+    plt.savefig("resources/diagrams/frequency.svg", format="svg", dpi=1200)
+
+    # Language analysis
+    model = fasttext.load_model('resources/models/lid.176.ftz')
+    for sentence in sentences:
+        lang = model.predict(sentence.rstrip(), k=1)
+        lang_key = lang[0][0].split("__label__")[1]
+        if lang_key in sentence_lang_dict:
+            sentence_lang_dict[lang_key] += 1
+        else:
+            sentence_lang_dict[lang_key] = 1
+    labels = sentence_lang_dict.keys()
+    values = sentence_lang_dict.values()
+    explode = np.zeros(len(labels))
+    for index,lang in enumerate(labels):
+        if lang == "si":
+            explode[index] = 0.1
+    fig, ax = plt.subplots()
+    ax.pie(values, explode=explode, labels=labels, autopct='%1.1f%%',
+        shadow=True, startangle=90)
+    ax.axis('equal')
+    plt.savefig("resources/diagrams/language_analysis.svg", format="svg", dpi=1200)
+    plt.savefig("resources/diagrams/language_analysis.eps", format="eps", dpi=1200)
 
     unique_num_words = len(all_words_dict.keys())
     total_words = sum(all_words_dict.values())
@@ -154,4 +187,4 @@ with open("datasets/raw/sample0.txt") as dataset:
     print("Min word frequency: ", min(all_words_dict.values()))
     print("Average word frequency: ", (sum(all_words_dict.values()) / len(all_words_dict)))
 
-    plt.show()
+    #plt.show()
