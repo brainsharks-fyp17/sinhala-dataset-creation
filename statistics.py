@@ -67,11 +67,11 @@ def construct_dataset(dataset_path):
     dataset_zip.close()
 
 
-ccnet_dir = Path(
-    input(
-        'Please download the CCNet corpus from https://github.com/facebookresearch/cc_net and enter the path to the downloaded data: '
-    )
-)
+# ccnet_dir = Path(
+#     input(  
+#         'Please download the CCNet corpus from https://github.com/facebookresearch/cc_net and enter the path to the downloaded data: '
+#     )
+# )
 
 all_words_dict = dict()
 reverse_dict = dict()
@@ -79,7 +79,7 @@ len_dict = dict()  # key-> length; val-> number of words having that length
 sentence_len_dict = dict()  # key-> sentence; val->length of sentence
 sentence_len_dict_reverse = dict()  # key->legth of a sentence; val-> number of sentences with that length
 
-with open("datasets/stat/dataset.txt") as dataset:
+with open("datasets/raw/sample0.txt") as dataset:
     sentences = dataset.readlines()
     init_stat(sentences, all_words_dict)
 
@@ -100,6 +100,8 @@ with open("datasets/stat/dataset.txt") as dataset:
     plt.xticks(wps_keys)
     plt.xlabel("length")
     plt.ylabel("number of sentences with the length")
+    plt.savefig("sentence_length.eps", format="eps", dpi=1200)
+    plt.savefig("sentence_length.svg", format="svg", dpi=1200)
 
     # word length analysis
     words_list = all_words_dict.keys()
@@ -119,6 +121,9 @@ with open("datasets/stat/dataset.txt") as dataset:
     plt.xticks(len_dict_keys_sorted)
     plt.xlabel("length")
     plt.ylabel("number of unique words")
+    plt.savefig("word_length.eps", format="eps", dpi=1200)
+    plt.savefig("word_length.svg", format="svg", dpi=1200)
+
 
     # frequency analysis
     for key in all_words_dict:
@@ -136,6 +141,8 @@ with open("datasets/stat/dataset.txt") as dataset:
     plt.plot(k_rev, v_rev, '.r')
     plt.xlabel("frequency")
     plt.ylabel("number of words with that frequency")
+    plt.savefig("frequency.eps", format="eps", dpi=1200)
+    plt.savefig("frequency.svg", format="svg", dpi=1200)
 
     unique_num_words = len(all_words_dict.keys())
     total_words = sum(all_words_dict.values())
