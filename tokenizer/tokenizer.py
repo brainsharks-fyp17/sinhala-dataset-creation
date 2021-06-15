@@ -1,13 +1,11 @@
 import re
 from typing import Tuple, Text, Dict, List
 
-import emoji
 
 Boolean = bool
 
 __all__ = [
-    'SinhalaTokenizer',
-    'SinhalaTweetTokenizer'
+    'SinhalaTokenizer'
 ]
 
 
@@ -101,16 +99,6 @@ class SinhalaTokenizer(Tokenizer):
         # init line tokenizer
         self.line_tokenizer_delims = '[{}]'.format(re.escape(''.join(self.line_tokenizing_chars)))
 
-    #replace number with ########
-    def clean_numbers(self, x):
-        if bool(re.search(r'\d', x)):
-            x = re.sub('[0-9]{5,}', '#####', x)
-            x = re.sub('[0-9]{4}', '####', x)
-            x = re.sub('[0-9]{3}', '###', x)
-            x = re.sub('[0-9]{2}', '##', x)
-            x = re.sub('[0-9]{1}', '#', x)
-        return x
-
     def tokenize(self, sentence: Text) -> List[Text]:
         # remove ignoring chars from document
         for ignoring_char in self.ignoring_chars:
@@ -123,18 +111,12 @@ class SinhalaTokenizer(Tokenizer):
 
         # prevent short forms being splitted into separate tokens
         # Eg: පෙ.ව.
-        # for short_form in self.short_forms:
-        #     representation = short_form[0:-1] + self.short_form_identifier
-        #     sentence = sentence.replace(short_form, representation)
+        for short_form in self.short_forms:
+            representation = short_form[0:-1] + self.short_form_identifier
+            sentence = sentence.replace(short_form, representation)
 
         parts = re.split(r'({})'.format(self.word_tokenizer_delims), sentence)
         tokens = [token.replace(self.short_form_identifier, '.') for token in parts if len(token.strip()) != 0]
-
-        #replace numbers with ###
-        # i = 0
-        # for token in tokens:
-        #     tokens[i] = self.clean_numbers(token)
-        #     i += 1
 
         #remove punctuations
         new_tokens_without_punctionations = []
@@ -168,8 +150,6 @@ class SinhalaTokenizer(Tokenizer):
             if(len(text) < 40):
                 doc = re.sub(r'\([^()]+\)', '', doc)
 
-        #clean numbers
-        # doc = self.clean_numbers(doc)
 
         sentences = []
         # split lines
@@ -182,60 +162,4 @@ class SinhalaTokenizer(Tokenizer):
                 sentences.append(sentence)
             elif not return_sinhala_only and len(sentence) != 0:
                 sentences.append(sentence)
-        return sentences
-
-
-# noinspection SpellCheckingInspection
-class SinhalaTweetTokenizer(Tokenizer):
-    def __init__(self):
-        self.tokenizer = SinhalaTokenizer()
-        self._special_chars = ['_']
-        self._special_chars_map = str.maketrans({ord(c): '_{}'.format(c) for c in self._special_chars})
-        self._var_type_pattern = {
-            'hashtag': r'#\w+',
-            'mention': r'@\w+',
-            'url': r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-        }  # for creation of lookups
-
-    def escape(self, string: Text) -> Tuple[Text, Dict[Text, Tuple[Text, Text]]]:
-        """
-        Escape special characters in a string.
-        """
-        lookup = {}
-        string = string.translate(self._special_chars_map)
-        var_id= 0
-        for var_type, pattern in self._var_type_pattern.items():
-            vals = re.findall(pattern, string)
-            for v in vals:
-                var, val = 'VAR_{}'.format(var_id), v
-                lookup[var] = (val, var_type)
-                string = string.replace(val, var)
-                var_id += 1
-        return string, lookup
-
-    # noinspection PyMethodMayBeStatic
-    def unescape(self, string: Text, lookup: Dict[Text, Tuple[Text, Text]]) -> Text:
-        """
-        UnEscape special characters in a string.
-        """
-        for var, val in lookup.items():
-            string = string.replace(var, val[0])
-        return re.sub(r'_(.)', r'\1', string)
-
-    def tokenize(self, sentence: Text) -> List[Text]:
-        """
-        Tokenize the input sentence(tweet) and return `List[Text]` containing tokens.
-        """
-        sentence, lookup = self.escape(sentence)
-        for e in emoji.UNICODE_EMOJI:
-            if e in sentence:
-                sentence = sentence.replace(e, ' {} '.format(e))
-        sentence = re.sub(r'\xa0', ' ', sentence)
-        sentence = re.sub(r' +', ' ', sentence)
-        tokens = [self.unescape(token, lookup) for token in self.tokenizer.tokenize(sentence)]
-        return tokens
-
-    def split_sentences(self, doc: Text, return_sinhala_only: Boolean = False) -> List[Text]:
-        doc, lookup = self.escape(doc)
-        sentences = [self.unescape(token, lookup) for token in self.tokenizer.split_sentences(doc, return_sinhala_only)]
         return sentences

@@ -1,1 +1,3 @@
 *.pyc
+datasets/temp/
+datasets/tokenized/
