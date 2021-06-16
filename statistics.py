@@ -5,6 +5,7 @@ import tarfile
 from pathlib import Path
 import fasttext
 import numpy as np
+import codecs
 
 sinhala_start = 3456
 vowels_and_const_end = 3527
@@ -82,11 +83,14 @@ sentence_len_dict = dict()  # key-> sentence; val->length of sentence
 sentence_len_dict_reverse = dict()  # key->legth of a sentence; val-> number of sentences with that length
 sentence_lang_dict = dict()
 
-with open("datasets/raw/sample0.txt") as dataset:
+with open("datasets/tokenized/tokenized_shard_100000.txt") as dataset:
     sentences = dataset.readlines()
     init_stat(sentences, all_words_dict)
     if not os.path.exists("resources/diagrams"):
         os.makedirs("resources/diagrams")
+    if not os.path.exists("resources/reports"):
+        os.makedirs("resources/reports")
+    report_file = codecs.open("resources/reports/report.txt", "w+", "utf-8")
 
     # sentence length analysis
     for sen in sentences:
@@ -109,6 +113,19 @@ with open("datasets/raw/sample0.txt") as dataset:
     plt.ylabel("number of sentences with the length")
     plt.savefig("resources/diagrams/sentence_length.eps", format="eps", dpi=1200)
     plt.savefig("resources/diagrams/sentence_length.svg", format="svg", dpi=1200)
+    report_file.write("-------------------Sentence report-------------------\n")
+    report_file.write("\n")
+    max_sorted_sentence_len_dict = dict(sorted(sentence_len_dict.items(), key=lambda kv: kv[1], reverse=True)[:100])
+    sentence_len_dict_zero_removed = {key:val for key, val in sentence_len_dict.items() if val != 0}
+    min_sorted_sentence_len_dict = dict(sorted(sentence_len_dict_zero_removed.items(), key=lambda kv: kv[1])[:100])
+    report_file.write("Maximum 100 sentences\n")
+    for key, value in max_sorted_sentence_len_dict.items():
+        report_file.write("{key}\n".format(key=key, value=value))
+    report_file.write("\n")
+    report_file.write("Minimum 100 sentences\n")
+    for key, value in min_sorted_sentence_len_dict.items():
+        report_file.write("{key}\n".format(key=key, value=value))
+    report_file.write("\n")
 
     # word length analysis
     words_list = all_words_dict.keys()
@@ -132,6 +149,19 @@ with open("datasets/raw/sample0.txt") as dataset:
     plt.ylabel("number of unique words")
     plt.savefig("resources/diagrams/word_length.eps", format="eps", dpi=1200)
     plt.savefig("resources/diagrams/word_length.svg", format="svg", dpi=1200)
+    report_file.write("-------------------Word report-------------------\n")
+    report_file.write("\n")
+    max_sorted_word_len_dict = dict(sorted(all_words_dict.items(), key=lambda kv: kv[1], reverse=True)[:100])
+    word_len_dict_zero_removed = {key:val for key, val in all_words_dict.items() if val != 0}
+    min_sorted_word_len_dict = dict(sorted(word_len_dict_zero_removed.items(), key=lambda kv: kv[1])[:100])
+    report_file.write("Maximum 100 words\n")
+    for key, value in max_sorted_word_len_dict.items():
+        report_file.write("{key} - {value}\n".format(key=key, value=value))
+    report_file.write("\n")
+    report_file.write("Minimum 100 words\n")
+    for key, value in min_sorted_word_len_dict.items():
+        report_file.write("{key} - {value}\n".format(key=key, value=value))
+    report_file.write("\n")
 
 
     # frequency analysis
@@ -176,9 +206,16 @@ with open("datasets/raw/sample0.txt") as dataset:
     ax.axis('equal')
     plt.savefig("resources/diagrams/language_analysis.svg", format="svg", dpi=1200)
     plt.savefig("resources/diagrams/language_analysis.eps", format="eps", dpi=1200)
+    report_file.write("-------------------Language report-------------------\n")
+    report_file.write("\n")
+    for lang, value in sentence_lang_dict.items():
+        report_file.write("{lang} : {value}\n".format(lang=lang, value=value))
+
 
     unique_num_words = len(all_words_dict.keys())
     total_words = sum(all_words_dict.values())
+    report_file.write("-------------------Summary-------------------\n")
+    report_file.write("\n")
     print("Total number of words: ", total_words)
     print("Number of unique words: ", unique_num_words)
     print("Number of sentences: ", len(sentences))
@@ -186,5 +223,13 @@ with open("datasets/raw/sample0.txt") as dataset:
     print("Max word frequency: ", max(all_words_dict.values()))
     print("Min word frequency: ", min(all_words_dict.values()))
     print("Average word frequency: ", (sum(all_words_dict.values()) / len(all_words_dict)))
+    report_file.write("Total number of words: {total}\n".format(total=total_words))
+    report_file.write("Number of unique words: {unique}\n".format(unique=unique_num_words))
+    report_file.write("Number of sentences: {sentences}\n".format(sentences=len(sentences)))
+    report_file.write("Average number of words in a sentence: {avg}\n".format(avg=(sum(sentence_len_dict.values()) / len(sentences))))
+    report_file.write("Max word frequency: {max}\n".format(max=max(all_words_dict.values())))
+    report_file.write("Min word frequency: {min}\n".format(min=min(all_words_dict.values())))
+    report_file.write("Average word frequency:{avg_word}\n".format(avg_word=(sum(all_words_dict.values()) / len(all_words_dict))))
+
 
     #plt.show()
