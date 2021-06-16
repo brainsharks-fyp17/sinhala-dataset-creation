@@ -93,7 +93,7 @@ with open("datasets/raw/sample0.txt") as dataset:
         sentence_len_dict[sen] = words_in_sentence(sen)
     for val in sentence_len_dict.values():
         if val > 400:
-            pass
+            continue
         if val in sentence_len_dict_reverse.keys():
             sentence_len_dict_reverse[val] += 1
         else:
@@ -115,7 +115,7 @@ with open("datasets/raw/sample0.txt") as dataset:
     for wrd in words_list:
         ln = word_length(wrd)
         if ln > 150:
-            pass
+            continue
         if ln in len_dict:
             len_dict[ln] += 1
         else:
@@ -138,7 +138,7 @@ with open("datasets/raw/sample0.txt") as dataset:
     for key in all_words_dict:
         val = all_words_dict[key]
         if val > 150:
-            pass
+            continue
         if val in reverse_dict:
             reverse_dict[val] += 1
         else:
