@@ -107,8 +107,11 @@ with open("datasets/tokenized/tokenized_shard_100000.txt") as dataset:
     wps_values = []
     for i in wps_keys:
         wps_values.append(sentence_len_dict_reverse[i])
+    #wps_keys_gap = sorted(sentence_len_dict_reverse.keys(), key=lambda k: k%4 == 0)
     plt.bar(wps_keys, wps_values, align='center')
     plt.xticks(wps_keys)
+    plt.xticks(rotation=90, fontsize=4)
+    
     plt.xlabel("length")
     plt.ylabel("number of sentences with the length")
     plt.savefig("resources/diagrams/sentence_length.eps", format="eps", dpi=1200)
@@ -145,6 +148,7 @@ with open("datasets/tokenized/tokenized_shard_100000.txt") as dataset:
         len_dict_values_sorted.append(len_dict[k])
     plt.bar(len_dict_keys_sorted, len_dict_values_sorted, align='center')
     plt.xticks(len_dict_keys_sorted)
+    plt.xticks(rotation=90, fontsize=4)
     plt.xlabel("length")
     plt.ylabel("number of unique words")
     plt.savefig("resources/diagrams/word_length.eps", format="eps", dpi=1200)
