@@ -92,7 +92,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument("file_path", help="File path of the data file")
 args = parser.parse_args()
 file_path = args.file_path
-report_name = args.report_name
 
 if (not path.exists(file_path)):
     print("File %s doesn't exist. Verify file path." % file_path)
