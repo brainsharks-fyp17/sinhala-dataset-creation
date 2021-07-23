@@ -202,33 +202,6 @@ else:
         plt.savefig("resources/diagrams/frequency.eps", format="eps", dpi=1200)
         plt.savefig("resources/diagrams/frequency.svg", format="svg", dpi=1200)
 
-        # Language analysis
-        model = fasttext.load_model('resources/models/lid.176.ftz')
-        for sentence in sentences:
-            lang = model.predict(sentence.rstrip(), k=1)
-            lang_key = lang[0][0].split("__label__")[1]
-            if lang_key in sentence_lang_dict:
-                sentence_lang_dict[lang_key] += 1
-            else:
-                sentence_lang_dict[lang_key] = 1
-        labels = sentence_lang_dict.keys()
-        values = sentence_lang_dict.values()
-        explode = np.zeros(len(labels))
-        for index,lang in enumerate(labels):
-            if lang == "si":
-                explode[index] = 0.1
-        fig, ax = plt.subplots()
-        ax.pie(values, explode=explode, labels=labels, autopct='%1.1f%%',
-            shadow=True, startangle=90)
-        ax.axis('equal')
-        plt.savefig("resources/diagrams/language_analysis.svg", format="svg", dpi=1200)
-        plt.savefig("resources/diagrams/language_analysis.eps", format="eps", dpi=1200)
-        report_file.write("-------------------Language report-------------------\n")
-        report_file.write("\n")
-        for lang, value in sentence_lang_dict.items():
-            report_file.write("{lang} : {value}\n".format(lang=lang, value=value))
-
-
         unique_num_words = len(all_words_dict.keys())
         total_words = sum(all_words_dict.values())
         report_file.write("-------------------Summary-------------------\n")
